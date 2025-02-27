@@ -139,6 +139,32 @@ export const ChatInput = () => {
     setInput('');
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      if (e.ctrlKey) {
+        // Ctrl + Enter 只换行，阻止发送
+        e.preventDefault(); // 阻止默认行为
+        e.stopPropagation(); // 阻止事件冒泡，确保不会触发表单提交
+        
+        const textarea = e.target as HTMLTextAreaElement;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newValue = input.substring(0, start) + '\n' + input.substring(end);
+        setInput(newValue);
+        // 下一个事件循环中设置光标位置
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 1;
+        }, 0);
+        return false; // 确保不会继续处理
+      } else {
+        // 普通 Enter 发送消息
+        e.preventDefault();
+        if (!input.trim() || isLoading) return;
+        handleSubmit();
+      }
+    }
+  };
+
   useChatShortcuts({
     onSend: handleSubmit,
     onClear: () => {
@@ -237,11 +263,12 @@ export const ChatInput = () => {
           <Input.TextArea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={fileList.length > 0 ? "请输入关于文件的问题..." : "输入消息... (Ctrl + Enter 发送)"}
+            onKeyDown={handleKeyDown}
+            placeholder={fileList.length > 0 ? "请输入关于文件的问题..." : "输入消息... (Enter 发送，Ctrl + Enter 换行)"}
             autoSize={{ minRows: 1, maxRows: 4 }}
             className={styles.textarea}
           />
-          <Tooltip title="发送 (Ctrl + Enter)">
+          <Tooltip title="发送">
             <Button
               type="primary"
               icon={<SendOutlined />}

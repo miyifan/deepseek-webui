@@ -8,7 +8,7 @@ import { RouteGuard } from "@/components/layout/route-guard";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DeepSeek WebUI",
+  title: "DS-From-Mi",
   description: "基于 DeepSeek 大语言模型的现代化 Web 交互界面",
 };
 
