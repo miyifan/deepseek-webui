@@ -25,12 +25,12 @@ const menuItems = [
   {
     key: '/functions',
     icon: <FunctionOutlined />,
-    label: <Link href="/functions">函数配置</Link>,
+    label: <Link href="/functions">函数配置(BETA)</Link>,
   },
   {
     key: '/workflows',
     icon: <FunctionOutlined />,
-    label: <Link href="/workflows ">COZE插件配置</Link>,
+    label: <Link href="/workflows ">COZE插件配置(开发中)</Link>,
   },
   {
     key: '/functions',

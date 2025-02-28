@@ -26,7 +26,7 @@ export function ApiSettings() {
       <Form
         form={form}
         layout="vertical"
-        initialValues={{ apiKey: apiKey }}
+        initialValues={{}}
         onFinish={handleSubmit}
       >
         <Form.Item
