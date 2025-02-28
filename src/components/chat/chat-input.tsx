@@ -29,10 +29,10 @@ export const ChatInput = () => {
   const { settings, apiKey, updateSettings } = useSettingsStore();
 
   const handleFileUpload = async (file: File) => {
-    if (!apiKey) {
-      message.error('请先设置 API Key');
-      return Upload.LIST_IGNORE;
-    }
+    // if (!apiKey) {
+    //   message.error('请先设置 API Key');
+    //   return Upload.LIST_IGNORE;
+    // }
 
     const isLt10M = file.size / 1024 / 1024 < 10;
     if (!isLt10M) {

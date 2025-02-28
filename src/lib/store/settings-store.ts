@@ -138,7 +138,7 @@ const defaultSettings: ChatSettings = {
   topK: 50,
   maxLength: 10000,
   systemPrompt: '',
-  model: 'chat',
+  model: 'reasoner',
   functions: defaultFunctions,
 };
 

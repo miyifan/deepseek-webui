@@ -54,6 +54,6 @@ export interface ChatSettings {
   topK: number;
   maxLength: number;
   systemPrompt: string;
-  model: 'chat' | 'coder';
+  model: 'reasoner' | 'chat' | 'coder';
   functions: FunctionDefinition[];
 } 
