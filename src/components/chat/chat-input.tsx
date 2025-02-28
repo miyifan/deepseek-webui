@@ -142,10 +142,8 @@ export const ChatInput = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') {
       if (e.ctrlKey) {
-        // Ctrl + Enter 只换行，阻止发送
-        e.preventDefault(); // 阻止默认行为
-        e.stopPropagation(); // 阻止事件冒泡，确保不会触发表单提交
-        
+        e.preventDefault(); 
+        e.stopPropagation(); 
         const textarea = e.target as HTMLTextAreaElement;
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;

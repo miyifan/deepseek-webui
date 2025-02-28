@@ -13,6 +13,9 @@ interface SettingsState {
   resetFunctions: () => void;
 }
 
+// 添加公共变量
+const WEATHER_API_KEY = '70d187e64b9049c7a0012321252702';
+const SERP_API_KEY = '32c19cbba534abb7f5e9b30da83e4dcdadd78bc0807f6b8771e71864eaa38f95';
 const defaultFunctions: FunctionDefinition[] = [
   {
     id: 'weather',
@@ -41,7 +44,7 @@ const defaultFunctions: FunctionDefinition[] = [
     url: 'https://api.weatherapi.com/v1/current.json?q={location}&units={unit}',
     method: 'GET',
     headers: {
-      "key": "Yours API Key"
+      "key": WEATHER_API_KEY  // 使用公共变量
     },
   },
   {
@@ -51,22 +54,20 @@ const defaultFunctions: FunctionDefinition[] = [
     parameters: {
       type: 'object',
       properties: {
-        query: {
+        q: {
           type: 'string',
           description: '搜索关键词',
         },
-        limit: {
-          type: 'number',
-          description: '返回结果数量',
-        },
+        api_key: {
+          type: 'string',
+          description: 'API密钥',
+          default: SERP_API_KEY
+        }
       },
-      required: ['query'],
+      required: ['q', 'api_key'],
     },
     url: 'https://serpapi.com/search.json',
     method: 'GET',
-    headers: {
-      'api_key': '{SERP_API_KEY}',
-    },
   },
   {
     id: 'translate',
@@ -135,7 +136,7 @@ const defaultSettings: ChatSettings = {
   temperature: 0.7,
   topP: 0.9,
   topK: 50,
-  maxLength: 2000,
+  maxLength: 10000,
   systemPrompt: '',
   model: 'chat',
   functions: defaultFunctions,

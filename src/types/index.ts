@@ -11,6 +11,7 @@ export interface FunctionParameter {
   type: string;
   description?: string;
   enum?: string[];
+  default?: string;
 }
 
 export interface FunctionDefinition {
@@ -26,7 +27,20 @@ export interface FunctionDefinition {
   method: 'GET' | 'POST';
   headers?: Record<string, string>;
 }
-
+export interface SearchFunctionDefinition {
+  api_key: string;
+  id: string;
+  name: string;
+  description: string;
+  parameters: {
+    type: 'object';
+    properties: Record<string, FunctionParameter>;
+    required: string[];
+  };
+  url: string;
+  method: 'GET' | 'POST';
+  headers?: Record<string, string>;
+}
 export interface Settings {
   model: string;
   temperature: number;

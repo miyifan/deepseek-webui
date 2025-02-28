@@ -42,9 +42,9 @@ function validateObjectStructure(
     case 'string':
       if (typeof value !== 'string') return `${path.join('.')} 必须是字符串类型`;
       break;
-    case 'number':
-      if (typeof value !== 'number') return `${path.join('.')} 必须是数字类型`;
-      break;
+    // case 'number':
+    //   if (typeof value !== 'number') return `${path.join('.')} 必须是数字类型`;
+    //   break;
     case 'boolean':
       if (typeof value !== 'boolean') return `${path.join('.')} 必须是布尔类型`;
       break;
