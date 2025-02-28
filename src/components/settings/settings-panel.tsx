@@ -72,7 +72,7 @@ export function SettingsPanel() {
           name="maxLength"
           tooltip="生成文本的最大长度"
         >
-          <InputNumber min={1} max={4096} />
+          <InputNumber min={1} max={10001} />
         </Form.Item>
 
         <Form.Item

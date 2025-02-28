@@ -3,7 +3,6 @@
 import { Form, Input, Button, message } from 'antd';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { useState } from 'react';
-
 export function ApiSettings() {
   const { apiKey, setApiKey } = useSettingsStore();
   const [form] = Form.useForm();
@@ -27,7 +26,7 @@ export function ApiSettings() {
       <Form
         form={form}
         layout="vertical"
-        initialValues={{ apiKey }}
+        initialValues={{ apiKey: "sk-8d6ae9e94d2e4870abf891bca5801313" }}
         onFinish={handleSubmit}
       >
         <Form.Item
