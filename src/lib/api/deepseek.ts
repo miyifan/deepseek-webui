@@ -73,7 +73,8 @@ export async function chatCompletion(
         errorMessage.includes('api key') ||
         errorMessage.includes('access token') ||
         errorMessage.includes('unauthorized')) {
-        throw new Error('API Key 无效，请检查您的 API Key 设置');
+       
+        throw new Error(apiKey + 'API Key 无效，请检查您的 API Key 设置');
       }
 
       throw new Error(

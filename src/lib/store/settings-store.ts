@@ -146,7 +146,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       settings: defaultSettings,
-      apiKey: '',
+      apiKey: 'sk-8d6ae9e94d2e4870abf891bca5801313',
       updateSettings: (newSettings) =>
         set((state) => ({
           settings: { ...state.settings, ...newSettings },

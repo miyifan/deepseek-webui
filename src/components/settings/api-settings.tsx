@@ -1,5 +1,5 @@
 'use client';
-
+const apiKey = "sk-8d6ae9e94d2e4870abf891bca5801313"
 import { Form, Input, Button, message } from 'antd';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { useState } from 'react';
@@ -26,7 +26,7 @@ export function ApiSettings() {
       <Form
         form={form}
         layout="vertical"
-        initialValues={{ apiKey: "sk-8d6ae9e94d2e4870abf891bca5801313" }}
+        initialValues={{ apiKey: apiKey }}
         onFinish={handleSubmit}
       >
         <Form.Item
