@@ -15,6 +15,7 @@ interface ChatState {
   appendToLastMessage: (content: string) => void;
   setCurrentStreamingMessage: (content: string | null) => void;
   setCurrentStreamingReasoningMessage: (content: string | null) => void;
+  deleteLastMessage: () => void;
 }
 
 const defaultSettings: ChatSettings = {
@@ -55,6 +56,12 @@ export const useChatStore = create<ChatState>()(
       }),
       setCurrentStreamingMessage: (content) => set({ currentStreamingMessage: content }),
       setCurrentStreamingReasoningMessage: (content) => set({ currentStreamingReasoningMessage: content }),
+      deleteLastMessage: () => set((state) => {
+        if (state.messages.length === 0) return state;
+        const messages = [...state.messages];
+        messages.pop(); // 删除最后一条消息
+        return { messages };
+      }),
     }),
     {
       name: 'chat-store',

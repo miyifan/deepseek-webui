@@ -16,7 +16,7 @@ interface SettingsState {
 // 添加公共变量
 const WEATHER_API_KEY = '70d187e64b9049c7a0012321252702';
 const SERP_API_KEY = '32c19cbba534abb7f5e9b30da83e4dcdadd78bc0807f6b8771e71864eaa38f95';
-const defaultFunctions: FunctionDefinition[] = [
+export const defaultFunctions: FunctionDefinition[] = [
   {
     id: 'weather',
     name: 'get_weather',
@@ -41,7 +41,7 @@ const defaultFunctions: FunctionDefinition[] = [
       },
       required: ['location'],
     },
-    url: 'https://api.weatherapi.com/v1/current.json?q={location}&units={unit}',
+    url: `https://api.weatherapi.com/v1/current.json?q={location}&key=${WEATHER_API_KEY}`,
     method: 'GET',
     headers: {
       "key": WEATHER_API_KEY  // 使用公共变量
@@ -57,17 +57,13 @@ const defaultFunctions: FunctionDefinition[] = [
         q: {
           type: 'string',
           description: '搜索关键词',
-        },
-        api_key: {
-          type: 'string',
-          description: 'API密钥',
-          default: SERP_API_KEY
         }
       },
-      required: ['q', 'api_key'],
+      required: ['q'],
     },
-    url: 'https://serpapi.com/search.json',
+    url: `/api/proxy?url=${encodeURIComponent(`https://serpapi.com/search.json?api_key=${SERP_API_KEY}&q={q}`)}`,
     method: 'GET',
+    headers: {}
   },
   {
     id: 'translate',

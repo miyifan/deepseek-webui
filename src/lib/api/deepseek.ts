@@ -22,6 +22,7 @@ export async function chatCompletion(
   apiKey: string,
   onStream?: (content: string) => void,
   onStreamReasoning?: (content: string) => void,
+  abortController?: AbortController
 ) {
   // const openai = new OpenAI({
   //   baseURL: API_CONFIG.BASE_URL,
@@ -62,6 +63,7 @@ export async function chatCompletion(
         ...(tools && tools.length > 0 ? { tools } : {}),
         stream: true,
       }),
+      signal: abortController?.signal
     });
 
     if (!response.ok) {

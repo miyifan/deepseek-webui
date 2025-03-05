@@ -20,6 +20,7 @@ export async function chatCompletion(
   settings: Settings,
   apiKey: string,
   onStream?: (content: string) => void,
+  abortController?: AbortController
 ) {
   // const openai = new OpenAI({
   //   baseURL: API_CONFIG.BASE_URL,
@@ -32,15 +33,15 @@ export async function chatCompletion(
     // 验证消息序列
     validateMessages(messages, modelName);
 
-    // 只在非 deepseek-reasoner 模型时启用函数调用
-    const tools = modelName !== 'deepseek-reasoner' ? settings.functions?.map(func => ({
+    // 启用函数调用
+    const tools = settings.functions?.map(func => ({
       type: 'function' as const,
       function: {
         name: func.name,
         description: func.description,
         parameters: func.parameters,
       },
-    })) : undefined;
+    }));
 
     if (!apiKey || apiKey.length < 30) {
       throw new Error('请先在设置页面配置您的 DeepSeek API Key');
@@ -51,15 +52,18 @@ export async function chatCompletion(
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'text/event-stream',
       },
       body: JSON.stringify({
         model: API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS],
-        messages: messages.map(({ role, content }) => ({ role, content })),
+        messages: messages.map(msg => ({ 
+          role: msg.role, 
+          content: msg.content 
+        })),
         temperature: settings.temperature,
         ...(tools && tools.length > 0 ? { tools } : {}),
         stream: true,
       }),
+      signal: abortController?.signal
     });
 
     if (!response.ok) {
@@ -159,12 +163,14 @@ export async function chatCompletion(
                       headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${apiKey}`,
-                        'Accept': 'text/event-stream',
                       },
                       body: JSON.stringify({
                         model: API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS],
                         messages: [
-                          ...messages,
+                          ...messages.map(msg => ({ 
+                            role: msg.role, 
+                            content: msg.content 
+                          })),
                           {
                             role: 'assistant',
                             content: fullContent,
@@ -180,12 +186,13 @@ export async function chatCompletion(
                           {
                             role: 'tool',
                             tool_call_id: currentToolCall.id,
-                            content: JSON.stringify(result),
-                          },
+                            content: JSON.stringify(result)
+                          }
                         ],
                         temperature: settings.temperature,
                         stream: true,
                       }),
+                      signal: abortController?.signal
                     });
 
                     if (!secondResponse.ok) {
