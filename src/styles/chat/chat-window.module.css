@@ -84,6 +84,9 @@
 
 .messageTextContent pre {
   @apply bg-gray-50 rounded-md;
+  font-size: 12px;
+  line-height: 1.4;
+  background-color: #000000;
 }
 
 .messageTime {

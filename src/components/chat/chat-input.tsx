@@ -10,6 +10,7 @@ import { openUploadFile } from '@/lib/api/deepseekopenapi';
 import { useChatShortcuts } from '@/hooks/use-chat-shortcuts';
 import styles from '@/styles/chat/chat-input.module.css';
 import { TemplateSelector } from './template-selector';
+import { ModelSelector } from './model-selector';
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import type { UploadFile } from 'antd/es/upload/interface';
 
@@ -250,10 +251,13 @@ export const ChatInput = () => {
   return (
     <div className={styles.container}>
       <div className={styles.toolbar}>
-        <TemplateSelector 
-          onSelect={handleTemplateSelect}
-          disabled={isLoading} 
-        />
+        <div className={styles.toolbarLeft}>
+          <TemplateSelector 
+            onSelect={handleTemplateSelect}
+            disabled={isLoading} 
+          />
+          <ModelSelector />
+        </div>
         <div className={styles.toolbarActions}>
           {/* <Upload
             multiple

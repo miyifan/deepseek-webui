@@ -8,7 +8,7 @@ import { UserOutlined, RobotOutlined } from '@ant-design/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageContent } from './message-content';
 import { MessageContentR1 } from './message-content-r1';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from '@/styles/chat/chat-window.module.css';
 
 export const ChatWindow = () => {
@@ -17,18 +17,52 @@ export const ChatWindow = () => {
   const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
   const currentStreamingReasoningMessage = useChatStore((state) => state.currentStreamingReasoningMessage);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [userScrolled, setUserScrolled] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!userScrolled) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // 检测用户滚动
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+    
+    if (isAtBottom) {
+      setUserScrolled(false);
+    } else if (isLoading || currentStreamingMessage) {
+      setUserScrolled(true);
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, currentStreamingMessage, currentStreamingReasoningMessage]);
+  }, [messages, currentStreamingMessage, currentStreamingReasoningMessage, userScrolled]);
+
+  // 添加滚动事件监听
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  // 当新消息添加时，如果用户没有滚动，则滚动到底部
+  useEffect(() => {
+    if (messages.length > 0 && !userScrolled) {
+      scrollToBottom();
+    }
+  }, [messages.length, userScrolled]);
 
   return (
     <div className={styles.container}>
-      <div className={styles.messageList}>
+      <div className={styles.messageList} ref={containerRef} onScroll={handleScroll}>
         <AnimatePresence mode="popLayout">
           {messages.map((message: Message) => (
             <motion.div

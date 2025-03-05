@@ -33,13 +33,17 @@ const menuItems = [
     label: <Link href="/workflows ">COZE插件配置(开发中)</Link>,
   },
   {
-    key: '/functions',
+    key: '/settings',
     icon: <SettingOutlined />,
     label: <Link href="/settings">设置</Link>,
   },
 ];
 
-export function NavMenu() {
+interface NavMenuProps {
+  onItemClick?: () => void;
+}
+
+export function NavMenu({ onItemClick }: NavMenuProps = {}) {
   const pathname = usePathname();
   const selectedKey = menuItems.find(item => 
     pathname.startsWith(item.key)
@@ -51,6 +55,7 @@ export function NavMenu() {
       selectedKeys={[selectedKey]}
       items={menuItems}
       className={styles.menu}
+      onClick={onItemClick ? () => onItemClick() : undefined}
     />
   );
 } 

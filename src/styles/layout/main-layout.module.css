@@ -1,15 +1,65 @@
 .container {
-  @apply min-h-screen;
+  min-height: 100vh;
 }
 
 .sider {
-  @apply border-r;
+  border-right: 1px solid #f0f0f0;
 }
 
 .logo {
-  @apply p-4 text-xl font-bold border-b;
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .content {
-  @apply p-6;
+  padding: 1.5rem;
+}
+
+/* 移动端样式 */
+.mobileNav {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: white;
+  z-index: 1000;
+}
+
+.menuToggle {
+  margin-right: 1rem;
+}
+
+.mobileTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.mobileSider {
+  position: fixed;
+  height: 100%;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.desktopSider {
+  position: fixed;
+  height: 100%;
+}
+
+.blurredContent {
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+/* 媒体查询 */
+@media (max-width: 768px) {
+  .content {
+    padding: 0.5rem;
+    margin-left: 0 !important;
+  }
 } 
