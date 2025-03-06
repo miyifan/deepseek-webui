@@ -4,6 +4,7 @@ import { Layout, Button, Drawer } from 'antd';
 import { NavMenu } from './nav-menu';
 import { PageBreadcrumb } from './breadcrumb';
 import { BalanceDisplay } from './balance-display';
+import { CacheCleaner } from './cache-cleaner';
 import { useState, useEffect } from 'react';
 import { MenuOutlined } from '@ant-design/icons';
 import styles from '@/styles/layout/main-layout.module.css';
@@ -88,6 +89,9 @@ export default function MainLayout({
               <NavMenu onItemClick={() => setDrawerVisible(false)} />
               <BalanceDisplay />
             </div>
+            <div style={{ position: 'relative', height: '0px' }}>
+              <CacheCleaner inDrawer={true} />
+            </div>
           </Drawer>
         </>
       ) : (
@@ -104,6 +108,9 @@ export default function MainLayout({
             <div className="flex-1 overflow-y-auto">
               <NavMenu />
               <BalanceDisplay />
+            </div>
+            <div style={{ position: 'relative', height: '0px' }}>
+              <CacheCleaner />
             </div>
           </div>
         </Sider>
