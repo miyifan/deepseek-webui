@@ -60,9 +60,40 @@ export const ChatWindow = () => {
     }
   }, [messages.length, userScrolled]);
 
+  // 添加窗口大小变化监听
+  useEffect(() => {
+    const handleResize = () => {
+      // 强制重新渲染以确保布局正确
+      if (!userScrolled) {
+        scrollToBottom();
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [userScrolled]);
+
   return (
-    <div className={styles.container}>
-      <div className={styles.messageList} ref={containerRef} onScroll={handleScroll}>
+    <div 
+      className={styles.container} 
+      style={{ 
+        width: '100%', 
+        maxWidth: '100%', 
+        padding: 0, 
+        margin: 0
+      }}
+    >
+      <div 
+        className={styles.messageList} 
+        ref={containerRef} 
+        onScroll={handleScroll} 
+        style={{ 
+          width: '100%', 
+          maxWidth: '100%', 
+          padding: '0.75rem 0.75rem', 
+          boxSizing: 'border-box' 
+        }}
+      >
         <AnimatePresence mode="popLayout">
           {messages.map((message: Message) => (
             <motion.div

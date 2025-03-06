@@ -17,11 +17,20 @@ export default function MainLayout({
 }) {
   const [isMobile, setIsMobile] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(220);
 
   // 检测窗口大小变化
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const newIsMobile = window.innerWidth <= 768;
+      setIsMobile(newIsMobile);
+      
+      // 根据窗口宽度设置侧边栏宽度
+      if (window.innerWidth <= 992 && window.innerWidth > 768) {
+        setSidebarWidth(180);
+      } else {
+        setSidebarWidth(220);
+      }
     };
     
     // 初始检查
@@ -34,8 +43,22 @@ export default function MainLayout({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // 添加布局刷新处理
+  useEffect(() => {
+    // 当窗口大小改变时，强制重新计算布局
+    const handleResize = () => {
+      // 添加一个小延迟以确保所有状态更新完成
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 200);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <Layout className="h-screen">
+    <Layout className={`h-screen ${styles.container}`} style={{ padding: 0, margin: 0, overflow: 'hidden' }}>
       {isMobile ? (
         <>
           <div className={styles.mobileNav}>
@@ -66,7 +89,8 @@ export default function MainLayout({
         <Sider 
           theme="light" 
           className={styles.desktopSider}
-          width={220}
+          width={sidebarWidth}
+          style={{ position: 'fixed', left: 0, height: '100%', zIndex: 10 }}
         >
           <div className="flex flex-col h-full">
             <div className="p-4 border-b">
@@ -80,8 +104,18 @@ export default function MainLayout({
         </Sider>
       )}
       
-      <Layout style={{ marginLeft: isMobile ? 0 : 220 }}>
-        <Content className="h-full overflow-hidden">
+      <Layout 
+        style={{ 
+          marginLeft: isMobile ? 0 : `${sidebarWidth}px`, 
+          padding: 0, 
+          margin: 0,
+          width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`,
+          transition: 'all 0.3s ease',
+          position: 'relative'
+        }} 
+        className="flex-grow flex-shrink-0 overflow-hidden"
+      >
+        <Content className={`h-full overflow-hidden p-0 m-0`} style={{ width: '100%' }}>
           {children}
         </Content>
       </Layout>

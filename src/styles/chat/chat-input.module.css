@@ -1,6 +1,10 @@
 .container {
   border-top: 1px solid #e5e7eb;
   padding: 1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 .toolbar {
@@ -25,11 +29,13 @@
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;
+  width: 100%;
 }
 
 .textarea {
   flex: 1;
   resize: none;
+  width: 100%;
 }
 
 .sendButton {

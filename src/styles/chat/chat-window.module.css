@@ -1,17 +1,29 @@
 .container {
   flex: 1;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .messageList {
   height: calc(100vh - 160px);
   overflow-y: auto;
-  padding: 1rem;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  width: 100%;
+  max-width: 100%;
+  flex-grow: 1;
+  box-sizing: border-box;
 }
 
 /* 自定义滚动条样式 */
@@ -45,7 +57,7 @@
 }
 
 .messageCard {
-  @apply max-w-[85%] rounded-lg shadow-sm;
+  @apply max-w-[90%] rounded-lg shadow-sm;
 }
 
 .messageCardAssistant {
@@ -95,4 +107,15 @@
 
 .loadingWrapper {
   @apply flex justify-center py-4;
+}
+
+@media (max-width: 768px) {
+  .messageList {
+    padding: 0.5rem;
+    height: calc(100vh - 140px);
+  }
+  
+  .messageCard {
+    @apply max-w-[95%];
+  }
 } 
