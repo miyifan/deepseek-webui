@@ -16,34 +16,59 @@ export const ChatWindow = () => {
   const isLoading = useChatStore((state) => state.isLoading);
   const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
   const currentStreamingReasoningMessage = useChatStore((state) => state.currentStreamingReasoningMessage);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [userScrolled, setUserScrolled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
+  
+  // 用户是否手动滚动的状态
+  const [userScrolled, setUserScrolled] = useState(false);
+  // 跟踪上一次消息数量，用于检测新消息
+  const [lastMessageCount, setLastMessageCount] = useState(0);
+  // 是否在底部的阈值（像素）
+  const SCROLL_THRESHOLD = 10;
+  
+  // 滚动到底部的函数
   const scrollToBottom = () => {
-    if (!userScrolled) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  // 检测用户滚动
+  
+  // 检查是否在底部
+  const isNearBottom = () => {
+    if (!containerRef.current) return true;
+    
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+    return scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
+  };
+  
+  // 处理滚动事件
   const handleScroll = () => {
     if (!containerRef.current) return;
     
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
-    
-    if (isAtBottom) {
-      setUserScrolled(false);
-    } else if (isLoading || currentStreamingMessage) {
-      setUserScrolled(true);
-    }
+    // 当用户手动滚动时，记录用户滚动状态
+    // 如果滚动到接近底部，重置为非用户滚动状态
+    const nearBottom = isNearBottom();
+    setUserScrolled(!nearBottom);
   };
-
+  
+  // 初始加载和新消息时处理滚动
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, currentStreamingMessage, currentStreamingReasoningMessage, userScrolled]);
-
+    // 检测是否有新消息
+    const hasNewMessages = messages.length > lastMessageCount;
+    setLastMessageCount(messages.length);
+    
+    // 在初始加载或有新消息且用户在底部时滚动到底部
+    if (messages.length > 0 && (!userScrolled || (hasNewMessages && isNearBottom()))) {
+      scrollToBottom();
+    }
+  }, [messages.length, userScrolled]);
+  
+  // 处理流式响应的滚动
+  useEffect(() => {
+    if ((currentStreamingMessage || currentStreamingReasoningMessage) && !userScrolled) {
+      scrollToBottom();
+    }
+  }, [currentStreamingMessage, currentStreamingReasoningMessage, userScrolled]);
+  
   // 添加滚动事件监听
   useEffect(() => {
     const container = containerRef.current;
@@ -52,19 +77,12 @@ export const ChatWindow = () => {
       return () => container.removeEventListener('scroll', handleScroll);
     }
   }, []);
-
-  // 当新消息添加时，如果用户没有滚动，则滚动到底部
-  useEffect(() => {
-    if (messages.length > 0 && !userScrolled) {
-      scrollToBottom();
-    }
-  }, [messages.length, userScrolled]);
-
-  // 添加窗口大小变化监听
+  
+  // 窗口大小变化时的处理
   useEffect(() => {
     const handleResize = () => {
-      // 强制重新渲染以确保布局正确
-      if (!userScrolled) {
+      // 只有当用户未手动滚动或在底部附近时才滚动到底部
+      if (!userScrolled || isNearBottom()) {
         scrollToBottom();
       }
     };
@@ -72,7 +90,7 @@ export const ChatWindow = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [userScrolled]);
-
+  
   return (
     <div 
       className={styles.container} 
@@ -80,7 +98,9 @@ export const ChatWindow = () => {
         width: '100%', 
         maxWidth: '100%', 
         padding: 0, 
-        margin: 0
+        margin: 0,
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <div 
@@ -91,7 +111,7 @@ export const ChatWindow = () => {
           width: '100%', 
           maxWidth: '100%', 
           padding: '0.75rem 0.75rem', 
-          boxSizing: 'border-box' 
+          boxSizing: 'border-box'
         }}
       >
         <AnimatePresence mode="popLayout">
