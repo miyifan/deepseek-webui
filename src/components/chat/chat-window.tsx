@@ -96,7 +96,7 @@ export const ChatWindow = () => {
       className={styles.container} 
       style={{ 
         width: '100%', 
-        maxWidth: '100%', 
+        height: '100%',
         padding: 0, 
         margin: 0,
         boxSizing: 'border-box',
@@ -109,9 +109,9 @@ export const ChatWindow = () => {
         onScroll={handleScroll} 
         style={{ 
           width: '100%', 
-          maxWidth: '100%', 
-          padding: '0.75rem 0.75rem', 
-          boxSizing: 'border-box'
+          height: '100%',
+          boxSizing: 'border-box',
+          padding: '0 1.5rem'
         }}
       >
         <AnimatePresence mode="popLayout">

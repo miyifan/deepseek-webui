@@ -2,7 +2,6 @@
   flex: 1;
   overflow: hidden;
   width: 100%;
-  max-width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -12,16 +11,15 @@
 }
 
 .messageList {
-  height: calc(100vh - 160px);
+  height: 100%;
   overflow-y: auto;
-  padding: 0.75rem;
+  padding: 0.75rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   width: 100%;
-  max-width: 100%;
   flex-grow: 1;
   box-sizing: border-box;
 }
@@ -111,7 +109,7 @@
 
 @media (max-width: 768px) {
   .messageList {
-    padding: 0.5rem;
+    padding: 0.5rem 1rem !important;
     height: calc(100vh - 140px);
   }
   

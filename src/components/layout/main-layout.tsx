@@ -36,6 +36,11 @@ export default function MainLayout({
     // 初始检查
     checkMobile();
     
+    // 触发一次布局更新
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 100);
+    
     // 监听窗口大小变化
     window.addEventListener('resize', checkMobile);
     
@@ -107,15 +112,13 @@ export default function MainLayout({
       <Layout 
         style={{ 
           marginLeft: isMobile ? 0 : `${sidebarWidth}px`, 
-          padding: 0, 
-          margin: 0,
+          padding: 0,
           width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`,
           transition: 'all 0.3s ease',
-          position: 'relative'
         }} 
-        className="flex-grow flex-shrink-0 overflow-hidden"
+        className={styles.contentLayout}
       >
-        <Content className={`h-full overflow-hidden p-0 m-0`} style={{ width: '100%' }}>
+        <Content className={styles.content}>
           {children}
         </Content>
       </Layout>

@@ -20,15 +20,21 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
-.content {
-  padding: 0;
-  flex-grow: 1; /* 允许增长 */
-  flex-shrink: 0; /* 禁止收缩 */
-  margin: 0; /* 移除所有边距 */
-  width: 100%; /* 使用百分比而不是计算值 */
-  max-width: 100%; /* 确保不超过可用空间 */
-  transition: all 0.3s ease;
+.contentLayout {
+  flex-grow: 1;
+  flex-shrink: 0;
   overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.content {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* 移动端样式 */
