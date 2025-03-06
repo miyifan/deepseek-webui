@@ -50,7 +50,7 @@ export const defaultFunctions: FunctionDefinition[] = [
   {
     id: 'search',
     name: 'search_web',
-    description: '搜索网页内容',
+    description: '搜索网页内容,找到相关信息',
     parameters: {
       type: 'object',
       properties: {
@@ -61,7 +61,7 @@ export const defaultFunctions: FunctionDefinition[] = [
       },
       required: ['q'],
     },
-    url: `/api/proxy?url=${encodeURIComponent(`https://serpapi.com/search.json?api_key=${SERP_API_KEY}&q={q}`)}`,
+    url: `/api/proxy?url=${encodeURIComponent(`https://serpapi.com/search.json?api_key=${SERP_API_KEY}`)}&q={q}`,
     method: 'GET',
     headers: {}
   },
