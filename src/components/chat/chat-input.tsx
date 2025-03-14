@@ -143,8 +143,28 @@ export const ChatInput = () => {
         setCurrentStreamingReasoningMessage(null);
       } else if (error instanceof Error) {
         message.error(error.message);
+        
+        // 为 reasoner 模型添加默认响应
+        if (settings.model === 'reasoner') {
+          addMessage({
+            role: 'assistant',
+            content: '服务器正忙 请重试',
+            timestamp: Date.now(),
+            reasoning_content: '',
+          });
+        }
       } else {
         message.error('发送消息失败，请重试');
+        
+        // 为 reasoner 模型添加默认响应
+        if (settings.model === 'reasoner') {
+          addMessage({
+            role: 'assistant',
+            content: '服务器正忙 请重试',
+            timestamp: Date.now(),
+            reasoning_content: '',
+          });
+        }
       }
       console.error(error);
     } finally {

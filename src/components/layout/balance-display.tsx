@@ -7,6 +7,11 @@ import { useSettingsStore } from '@/lib/store/settings-store';
 import { getBalance, BalanceResponse } from '@/lib/api/deepseek';
 import styles from '@/styles/layout/balance-display.module.css';
 
+// 添加全局缓存
+let balanceCache: BalanceResponse | null = null;
+let lastFetchTime = 0;
+let isFetching = false;
+
 export const BalanceDisplay = () => {
   const { apiKey } = useSettingsStore();
   const [balance, setBalance] = useState<BalanceResponse | null>(null);
@@ -18,15 +23,29 @@ export const BalanceDisplay = () => {
       return;
     }
     
+    // 如果已经有缓存且距离上次获取时间不超过5分钟，直接使用缓存
+    const now = Date.now();
+    if (balanceCache && now - lastFetchTime < 5 * 60 * 1000) {
+      setBalance(balanceCache);
+      return;
+    }
+    
+    // 如果已经在获取中，跳过
+    if (isFetching) return;
+    
     try {
       setLoading(true);
+      isFetching = true;
       const data = await getBalance(apiKey);
+      balanceCache = data;
+      lastFetchTime = now;
       setBalance(data);
     } catch (error) {
       console.error('获取余额失败:', error);
       setBalance(null);
     } finally {
       setLoading(false);
+      isFetching = false;
     }
   };
 
