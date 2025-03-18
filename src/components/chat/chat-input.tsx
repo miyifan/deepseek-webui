@@ -138,33 +138,28 @@ export const ChatInput = () => {
     } catch (error) {
       // 检查是否是因为请求被取消导致的错误
       if (error instanceof Error && error.name === 'AbortError') {
-        message.info('消息发送已取消');
-        setCurrentStreamingMessage(null);
-        setCurrentStreamingReasoningMessage(null);
+        // 不需要在这里处理，因为取消处理已在handleCancelSend函数中完成
+        console.log('请求已被取消');
       } else if (error instanceof Error) {
         message.error(error.message);
         
-        // 为 reasoner 模型添加默认响应
-        if (settings.model === 'reasoner') {
-          addMessage({
-            role: 'assistant',
-            content: '服务器正忙 请重试',
-            timestamp: Date.now(),
-            reasoning_content: '',
-          });
-        }
+        // 为所有模型添加错误响应，不删除用户消息
+        addMessage({
+          role: 'assistant',
+          content: '服务器响应错误，请重试',
+          timestamp: Date.now(),
+          reasoning_content: '',
+        });
       } else {
         message.error('发送消息失败，请重试');
         
-        // 为 reasoner 模型添加默认响应
-        if (settings.model === 'reasoner') {
-          addMessage({
-            role: 'assistant',
-            content: '服务器正忙 请重试',
-            timestamp: Date.now(),
-            reasoning_content: '',
-          });
-        }
+        // 添加错误响应，不删除用户消息
+        addMessage({
+          role: 'assistant',
+          content: '服务器响应错误，请重试',
+          timestamp: Date.now(),
+          reasoning_content: '',
+        });
       }
       console.error(error);
     } finally {

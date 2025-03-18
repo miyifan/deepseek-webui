@@ -7,13 +7,8 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 
 // 验证消息序列是否合法
 function validateMessages(messages: ChatCompletionMessageParam[], model: string) {
-  if (model === 'deepseek-reasoner') {
-    for (let i = 1; i < messages.length; i++) {
-      if (messages[i].role === messages[i - 1].role) {
-        throw new Error('使用 deepseek-reasoner 模型时，消息序列中的用户和助手消息必须交替出现');
-      }
-    }
-  }
+  // 移除验证限制，允许任何消息序列
+  return messages;
 }
 
 export async function chatCompletion(
