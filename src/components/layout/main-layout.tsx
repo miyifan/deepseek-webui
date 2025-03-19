@@ -1,46 +1,32 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { Layout, Button, Drawer } from 'antd';
-import { NavMenu } from './nav-menu';
-import { PageBreadcrumb } from './breadcrumb';
-import { BalanceDisplay } from './balance-display';
-import { CacheCleaner } from './cache-cleaner';
-import { useState, useEffect } from 'react';
 import { MenuOutlined } from '@ant-design/icons';
 import styles from '@/styles/layout/main-layout.module.css';
+import { NavMenu } from './nav-menu';
+import { BalanceDisplay } from './balance-display';
+import { CacheCleaner } from './cache-cleaner';
+import { SettingsDrawer } from '../settings/settings-drawer';
+import { ChatWindows } from '../chat/chat-windows';
+import { usePathname } from 'next/navigation';
 
 const { Sider, Content } = Layout;
 
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(220);
-
+  const pathname = usePathname();
+  const isChatPage = pathname === '/chat';
+  
   // 检测窗口大小变化
   useEffect(() => {
     const checkMobile = () => {
-      const newIsMobile = window.innerWidth <= 768;
-      setIsMobile(newIsMobile);
-      
-      // 根据窗口宽度设置侧边栏宽度
-      if (window.innerWidth <= 992 && window.innerWidth > 768) {
-        setSidebarWidth(180);
-      } else {
-        setSidebarWidth(220);
-      }
+      setIsMobile(window.innerWidth <= 768);
     };
     
     // 初始检查
     checkMobile();
-    
-    // 触发一次布局更新
-    setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 100);
     
     // 监听窗口大小变化
     window.addEventListener('resize', checkMobile);
@@ -49,32 +35,18 @@ export default function MainLayout({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 添加布局刷新处理
-  useEffect(() => {
-    // 当窗口大小改变时，强制重新计算布局
-    const handleResize = () => {
-      // 添加一个小延迟以确保所有状态更新完成
-      setTimeout(() => {
-        window.dispatchEvent(new Event('resize'));
-      }, 200);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   return (
-    <Layout className={`h-screen ${styles.container}`} style={{ padding: 0, margin: 0, overflow: 'hidden' }}>
+    <Layout className={styles.container} style={{ height: '100vh', overflow: 'hidden' }}>
       {isMobile ? (
         <>
-          <div className={styles.mobileNav}>
+          <div className={styles.mobileNav || ''}>
             <Button 
               type="text" 
               icon={<MenuOutlined />} 
               onClick={() => setDrawerVisible(true)}
-              className={styles.menuToggle}
+              className={styles.menuToggle || ''}
             />
-            <h1 className={styles.mobileTitle}>DeepSeek</h1>
+            <h1 className={styles.mobileTitle || ''}>DeepSeek</h1>
           </div>
           
           <Drawer
@@ -83,32 +55,36 @@ export default function MainLayout({
             onClose={() => setDrawerVisible(false)}
             open={drawerVisible}
             width={250}
-            bodyStyle={{ padding: 0 }}
+            bodyStyle={{ padding: 0, overflow: 'hidden' }}
           >
-            <div className="flex-1 overflow-y-auto">
-              <NavMenu onItemClick={() => setDrawerVisible(false)} />
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-hidden py-2">
+                <NavMenu onItemClick={() => setDrawerVisible(false)} />
+                {isChatPage && <ChatWindows />}
+              </div>
               <BalanceDisplay />
-            </div>
-            <div style={{ position: 'relative', height: '0px' }}>
-              <CacheCleaner inDrawer={true} />
+              <div style={{ position: 'relative', height: '0px' }}>
+                <CacheCleaner inDrawer={true} />
+              </div>
             </div>
           </Drawer>
         </>
       ) : (
         <Sider 
           theme="light" 
-          className={styles.desktopSider}
-          width={sidebarWidth}
-          style={{ position: 'fixed', left: 0, height: '100%', zIndex: 10 }}
+          className={styles.desktopSider || ''}
+          width={220}
+          style={{ position: 'fixed', left: 0, height: '100%', zIndex: 10, overflow: 'hidden' }}
         >
           <div className="flex flex-col h-full">
             <div className="p-4 border-b">
               <h1 className="text-xl font-bold">DeepSeek</h1>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-visible py-2">
               <NavMenu />
-              <BalanceDisplay />
+              {isChatPage && <ChatWindows />}
             </div>
+            <BalanceDisplay />
             <div style={{ position: 'relative', height: '0px' }}>
               <CacheCleaner />
             </div>
@@ -118,17 +94,17 @@ export default function MainLayout({
       
       <Layout 
         style={{ 
-          marginLeft: isMobile ? 0 : `${sidebarWidth}px`, 
+          marginLeft: isMobile ? 0 : '220px', 
           padding: 0,
-          width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`,
-          transition: 'all 0.3s ease',
+          width: isMobile ? '100%' : 'calc(100% - 220px)',
         }} 
-        className={styles.contentLayout}
+        className={styles.contentLayout || ''}
       >
-        <Content className={styles.content}>
+        <Content className={styles.content || ''}>
           {children}
         </Content>
       </Layout>
+      <SettingsDrawer />
     </Layout>
   );
-} 
+}; 

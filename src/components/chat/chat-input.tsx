@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Input, Button, message, Tooltip, Modal, Upload } from 'antd';
 import { SendOutlined, DeleteOutlined, DownloadOutlined, PaperClipOutlined, StopOutlined } from '@ant-design/icons';
 import { useChatStore } from '@/lib/store/chat-store';
@@ -13,25 +13,156 @@ import { TemplateSelector } from './template-selector';
 import { ModelSelector } from './model-selector';
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import type { UploadFile } from 'antd/es/upload/interface';
+import type { ChatSettings } from '@/types';
 
-export const ChatInput = () => {
-  const [input, setInput] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
-  const [isSending, setIsSending] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  
-  const { 
-    addMessage, 
-    messages, 
-    isLoading, 
-    setLoading, 
-    clearMessages,
+const { TextArea } = Input;
+
+export const ChatInput: React.FC = () => {
+  const {
+    windows,
+    currentWindowId,
+    addMessage,
+    setLoading,
+    isSending,
+    setIsSending,
     setCurrentStreamingMessage,
     setCurrentStreamingReasoningMessage,
-    deleteLastMessage,
+    updateWindowTitle,
+    updateSettings,
+    clearMessages
   } = useChatStore();
-  const { settings, apiKey, updateSettings } = useSettingsStore();
+  
+  const { apiKey } = useSettingsStore();
+
+  const [content, setContent] = useState('');
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const currentWindow = windows.find(w => w.id === currentWindowId);
+  const messages = currentWindow?.messages || [];
+  const settings = currentWindow?.settings || {} as ChatSettings;
+
+  const handleSend = async () => {
+    if (!content.trim()) return;
+
+    const trimmedContent = content.trim();
+    setContent('');
+    await sendMessage(trimmedContent);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleCancelSend = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsSending(false);
+    setLoading(false);
+  };
+
+  const sendMessage = async (content: string, reasoning_content?: string) => {
+    if (!apiKey) {
+      message.error('请先设置 API Key');
+      return;
+    }
+
+    const displayUserMessage = {
+      role: 'user' as const,
+      content: content.trim(),
+      timestamp: Date.now(),
+      reasoning_content: reasoning_content ? reasoning_content?.trim() : '',
+    };
+
+    const apiUserMessage = {
+      role: 'user' as const,
+      content: content.trim(),
+    };
+
+    try {
+      addMessage(displayUserMessage);
+      setLoading(true);
+      setIsSending(true);
+      setCurrentStreamingMessage('');
+      setCurrentStreamingReasoningMessage('');
+
+      abortControllerRef.current = new AbortController();
+
+      const messageList = settings.systemPrompt
+        ? [
+            { role: 'system' as const, content: settings.systemPrompt },
+            ...messages.map(msg => ({ role: msg.role as any, content: msg.content })),
+            apiUserMessage,
+          ]
+        : [...messages.map(msg => ({ role: msg.role as any, content: msg.content })), apiUserMessage];
+
+      let streamContent = '';
+      let reasoningContent = '';
+      const response = await chatCompletion(
+        messageList as ChatCompletionMessageParam[],
+        settings,
+        apiKey,
+        (content: string) => {
+          streamContent += content;
+          setCurrentStreamingMessage(streamContent);
+        },
+        (content: string) => {
+          reasoningContent += content;
+          setCurrentStreamingReasoningMessage(reasoningContent);
+        },
+        abortControllerRef.current
+      );
+
+      addMessage({
+        role: 'assistant',
+        content: response.content,
+        timestamp: Date.now(),
+        reasoning_content: response.reasoningContent,
+      });
+
+      // 更新窗口标题（如果还没有设置过）
+      if (currentWindow && currentWindow.title === '新对话') {
+        const firstUserMessage = messages.find(msg => msg.role === 'user');
+        if (firstUserMessage) {
+          updateWindowTitle(currentWindow.id, firstUserMessage.content.slice(0, 30) + '...');
+        }
+      }
+
+      setFileList([]);
+      setUploadedFileIds([]);
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('请求已被取消');
+      } else if (error instanceof Error) {
+        message.error(error.message);
+        addMessage({
+          role: 'assistant',
+          content: '服务器响应错误，请重试',
+          timestamp: Date.now(),
+          reasoning_content: '',
+        });
+      } else {
+        message.error('发送消息失败，请重试');
+        addMessage({
+          role: 'assistant',
+          content: '服务器响应错误，请重试',
+          timestamp: Date.now(),
+          reasoning_content: '',
+        });
+      }
+      console.error(error);
+    } finally {
+      setIsSending(false);
+      setLoading(false);
+      abortControllerRef.current = null;
+    }
+  };
 
   const handleFileUpload = async (file: File) => {
     // if (!apiKey) {
@@ -70,149 +201,6 @@ export const ChatInput = () => {
     // 这里可以添加从服务器删除文件的逻辑，如果需要的话
   };
 
-  const sendMessage = async (content: string, reasoning_content?: string) => {
-    if (!apiKey) {
-      message.error('请先设置 API Key');
-      return;
-    }
-
-    // 用于界面显示的完整消息
-    const displayUserMessage = {
-      role: 'user' as const,
-      content: content.trim(),
-      timestamp: Date.now(),
-      reasoning_content: reasoning_content ? reasoning_content?.trim() : '',
-    };
-
-    // 发送到 API 的消息
-    const apiUserMessage = {
-      role: 'user' as const,
-      content: content.trim(),
-    };
-
-    try {
-      addMessage(displayUserMessage);
-      setLoading(true);
-      setIsSending(true);
-      setCurrentStreamingMessage('');
-      setCurrentStreamingReasoningMessage('');
-
-      // 创建 AbortController 用于取消请求
-      abortControllerRef.current = new AbortController();
-
-      const messageList = settings.systemPrompt
-        ? [
-            { role: 'system' as const, content: settings.systemPrompt },
-            ...messages.map(msg => ({ role: msg.role as any, content: msg.content })),
-            apiUserMessage,
-          ]
-        : [...messages.map(msg => ({ role: msg.role as any, content: msg.content })), apiUserMessage];
-
-      let streamContent = '';
-      let reasoningContent = '';
-      const response = await chatCompletion(
-        messageList as ChatCompletionMessageParam[], 
-        settings, 
-        apiKey,
-        (content: string) => {
-          streamContent += content;
-          setCurrentStreamingMessage(streamContent);
-        },
-        (content: string) => {
-          reasoningContent += content;
-          setCurrentStreamingReasoningMessage(reasoningContent);
-        },
-        abortControllerRef.current
-      );
-
-      addMessage({
-        role: 'assistant',
-        content: response.content,
-        timestamp: Date.now(),
-        reasoning_content: response.reasoningContent,
-      });
-
-      // 清空文件列表和ID
-      setFileList([]);
-      setUploadedFileIds([]);
-    } catch (error) {
-      // 检查是否是因为请求被取消导致的错误
-      if (error instanceof Error && error.name === 'AbortError') {
-        // 不需要在这里处理，因为取消处理已在handleCancelSend函数中完成
-        console.log('请求已被取消');
-      } else if (error instanceof Error) {
-        message.error(error.message);
-        
-        // 为所有模型添加错误响应，不删除用户消息
-        addMessage({
-          role: 'assistant',
-          content: '服务器响应错误，请重试',
-          timestamp: Date.now(),
-          reasoning_content: '',
-        });
-      } else {
-        message.error('发送消息失败，请重试');
-        
-        // 添加错误响应，不删除用户消息
-        addMessage({
-          role: 'assistant',
-          content: '服务器响应错误，请重试',
-          timestamp: Date.now(),
-          reasoning_content: '',
-        });
-      }
-      console.error(error);
-    } finally {
-      setIsSending(false);
-      setLoading(false);
-      abortControllerRef.current = null;
-    }
-  };
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || isLoading) return;
-    await sendMessage(input);
-    setInput('');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      if (e.ctrlKey) {
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        const textarea = e.target as HTMLTextAreaElement;
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const newValue = input.substring(0, start) + '\n' + input.substring(end);
-        setInput(newValue);
-        // 下一个事件循环中设置光标位置
-        setTimeout(() => {
-          textarea.selectionStart = textarea.selectionEnd = start + 1;
-        }, 0);
-        return false; // 确保不会继续处理
-      } else {
-        // 普通 Enter 发送消息
-        e.preventDefault();
-        if (!input.trim() || isLoading) return;
-        handleSubmit();
-      }
-    }
-  };
-
-  useChatShortcuts({
-    onSend: handleSubmit,
-    onClear: () => {
-      if (messages.length > 0) {
-        Modal.confirm({
-          title: '确认清空',
-          content: '确定要清空所有对话记录吗？此操作不可恢复。',
-          onOk: clearMessages,
-        });
-      }
-    },
-  });
-
   const handleExport = () => {
     try {
       const chatHistory = messages.map(msg => ({
@@ -243,25 +231,27 @@ export const ChatInput = () => {
       Modal.confirm({
         title: '确认清空',
         content: '确定要清空所有对话记录吗？此操作不可恢复。',
-        onOk: clearMessages,
+        onOk: () => {
+          clearMessages();
+        },
       });
     }
   };
 
   const handleTemplateSelect = async (prompt: string) => {
-    if (isLoading) return;
+    if (isSending) return;
     updateSettings({ systemPrompt: prompt });
-    clearMessages();
-    message.success('已应用模板，对话已重置');
+    setIsSending(true);
+    setLoading(true);
+    setCurrentStreamingMessage('');
+    setCurrentStreamingReasoningMessage('');
+    await sendMessage(prompt);
   };
 
-  const handleCancelSend = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      deleteLastMessage();
-      message.info('已取消发送，您可以重新输入消息');
-    }
-  };
+  useChatShortcuts({
+    onSend: handleSend,
+    onClear: handleClear,
+  });
 
   return (
     <div className={styles.container}>
@@ -269,25 +259,11 @@ export const ChatInput = () => {
         <div className={styles.toolbarLeft}>
           <TemplateSelector 
             onSelect={handleTemplateSelect}
-            disabled={isLoading} 
+            disabled={isSending} 
           />
           <ModelSelector />
         </div>
         <div className={styles.toolbarActions}>
-          {/* <Upload
-            multiple
-            showUploadList={false}
-            beforeUpload={handleFileUpload}
-            onChange={({ fileList }) => setFileList(fileList)}
-            fileList={fileList}
-          >
-            <Tooltip title="上传文件">
-              <Button
-                icon={<PaperClipOutlined />}
-                disabled={isLoading}
-              />
-            </Tooltip>
-          </Upload> */}
           <Tooltip title="导出对话">
             <Button
               icon={<DownloadOutlined />}
@@ -304,61 +280,68 @@ export const ChatInput = () => {
           </Tooltip>
         </div>
       </div>
-      <form onSubmit={handleSubmit}>
-        <div className={styles.inputWrapper}>
-          <Input.TextArea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={fileList.length > 0 ? "请输入关于文件的问题..." : "输入消息... (Enter 发送，Ctrl + Enter 换行)"}
-            autoSize={{ minRows: 1, maxRows: 4 }}
-            className={styles.textarea}
-            disabled={isSending}
-          />
-          {isSending ? (
-            <Tooltip title="取消发送">
-              <Button
-                danger
-                icon={<StopOutlined />}
-                onClick={handleCancelSend}
-                className={styles.sendButton}
-              >
-                取消
-              </Button>
-            </Tooltip>
-          ) : (
-            <Tooltip title="发送">
-              <Button
-                type="primary"
-                icon={<SendOutlined />}
-                onClick={() => handleSubmit()}
-                loading={isLoading && !isSending}
-                className={styles.sendButton}
-                disabled={isLoading}
-              >
-                发送
-              </Button>
-            </Tooltip>
-          )}
-        </div>
-        {fileList.length > 0 && (
-          <div className={styles.fileList}>
-            {fileList.map(file => (
-              <div key={file.uid} className={styles.fileItem}>
-                <PaperClipOutlined /> {file.name}
-                <Button
-                  type="text"
-                  size="small"
-                  danger
-                  onClick={() => handleFileRemove(file)}
-                >
-                  移除
-                </Button>
-              </div>
-            ))}
-          </div>
+      
+      <div className={styles.inputWrapper}>
+        <Upload
+          fileList={fileList}
+          onChange={({ fileList }) => setFileList(fileList)}
+          beforeUpload={handleFileUpload}
+        >
+          <Button icon={<PaperClipOutlined />} />
+        </Upload>
+        <TextArea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="输入消息，按 Enter 发送，Shift + Enter 换行"
+          autoSize={{ minRows: 1, maxRows: 4 }}
+          className={styles.textarea}
+          disabled={isSending}
+        />
+        {isSending ? (
+          <Tooltip title="取消发送">
+            <Button
+              danger
+              icon={<StopOutlined />}
+              onClick={handleCancelSend}
+              className={styles.sendButton}
+            >
+              取消
+            </Button>
+          </Tooltip>
+        ) : (
+          <Tooltip title="发送">
+            <Button
+              type="primary"
+              icon={<SendOutlined />}
+              onClick={handleSend}
+              loading={isSending}
+              className={styles.sendButton}
+              disabled={isSending}
+            >
+              发送
+            </Button>
+          </Tooltip>
         )}
-      </form>
+      </div>
+      
+      {fileList.length > 0 && (
+        <div className={styles.fileList}>
+          {fileList.map(file => (
+            <div key={file.uid} className={styles.fileItem}>
+              <PaperClipOutlined /> {file.name}
+              <Button
+                type="text"
+                size="small"
+                danger
+                onClick={() => handleFileRemove(file)}
+              >
+                移除
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }; 

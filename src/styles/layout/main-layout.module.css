@@ -75,6 +75,16 @@
   left: 0;
 }
 
+.desktopSider :global(.ant-layout-sider-children) {
+  overflow-y: hidden;
+  height: 100%;
+}
+
+/* 移除滚动条样式 */
+.desktopSider :global(.ant-layout-sider-children)::-webkit-scrollbar {
+  display: none;
+}
+
 .blurredContent {
   filter: blur(2px);
   pointer-events: none;

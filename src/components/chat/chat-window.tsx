@@ -12,10 +12,19 @@ import { useEffect, useRef, useState } from 'react';
 import styles from '@/styles/chat/chat-window.module.css';
 
 export const ChatWindow = () => {
-  const messages = useChatStore((state) => state.messages);
+  const { windows, currentWindowId } = useChatStore();
+  const currentWindow = windows.find(w => w.id === currentWindowId);
+  
+  // 如果没有当前窗口，返回空白内容
+  if (!currentWindow) {
+    return <div className={styles.container}></div>;
+  }
+  
+  const messages = currentWindow.messages || [];
   const isLoading = useChatStore((state) => state.isLoading);
   const currentStreamingMessage = useChatStore((state) => state.currentStreamingMessage);
   const currentStreamingReasoningMessage = useChatStore((state) => state.currentStreamingReasoningMessage);
+  const validateAndFixMessageSequence = useChatStore((state) => state.validateAndFixMessageSequence);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,6 +35,11 @@ export const ChatWindow = () => {
   const [lastMessageCount, setLastMessageCount] = useState(0);
   // 是否在底部的阈值（像素）
   const SCROLL_THRESHOLD = 10;
+  
+  // 页面加载时验证消息序列
+  useEffect(() => {
+    validateAndFixMessageSequence();
+  }, []);
   
   // 滚动到底部的函数
   const scrollToBottom = () => {

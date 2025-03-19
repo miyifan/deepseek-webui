@@ -1,26 +1,49 @@
 .pageContainer {
-  height: calc(100vh - 40px);
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .pageContent {
   flex: 1;
   background: white;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
 .pageHeader {
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pageTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
 }
 
 .pageBody {
   flex: 1;
   overflow: auto;
-  padding: 1rem;
+  position: relative;
+}
+
+/* 移动端样式 */
+@media (max-width: 768px) {
+  .pageContainer {
+    height: calc(100vh - 48px);
+  }
+  
+  .pageHeader {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .pageTitle {
+    font-size: 1.1rem;
+  }
 } 

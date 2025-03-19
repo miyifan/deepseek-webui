@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "@/styles/antd-overrides.css";
+import "@/styles/global.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { RouteGuard } from "@/components/layout/route-guard";
 
