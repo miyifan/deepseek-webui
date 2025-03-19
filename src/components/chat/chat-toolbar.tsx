@@ -6,7 +6,9 @@ import { useChatStore } from '@/lib/store/chat-store';
 import { useState } from 'react';
 
 export function ChatToolbar() {
-  const { messages, clearMessages } = useChatStore();
+  const { windows, currentWindowId, clearMessages } = useChatStore();
+  const currentWindow = windows.find(w => w.id === currentWindowId);
+  const messages = currentWindow?.messages || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleClear = () => {

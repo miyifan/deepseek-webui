@@ -1,5 +1,11 @@
+/* Tailwind CSS 基础样式 */
+/* stylelint-disable-next-line */
 @tailwind base;
+/* Tailwind CSS 组件类 */
+/* stylelint-disable-next-line */
 @tailwind components;
+/* Tailwind CSS 功能类 */
+/* stylelint-disable-next-line */
 @tailwind utilities;
 
 /* 抽屉内滚动条样式 */
