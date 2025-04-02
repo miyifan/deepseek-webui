@@ -26,7 +26,23 @@ export async function chatCompletion(
   // });
 
   try {
+    // 先检查settings对象是否完整
+    if (!settings || typeof settings !== 'object') {
+      console.error('设置对象无效:', settings);
+      throw new Error('聊天设置无效，请刷新页面重试');
+    }
+    
+    // 确保model字段存在并有效
+    if (!settings.model || !['chat', 'coder', 'reasoner'].includes(settings.model)) {
+      console.error('无效的模型类型:', settings.model);
+      console.log('使用默认chat模型替代');
+      settings.model = 'chat';
+    }
+    
+    // 确保获取正确的模型名称
     const modelName = API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS];
+    console.log('API调用 - 使用模型:', settings.model, '→', modelName, 'settings对象:', settings); 
+    
     // 验证消息序列
     validateMessages(messages, modelName);
 
@@ -43,6 +59,10 @@ export async function chatCompletion(
     if (!apiKey || apiKey.length < 30) {
       throw new Error('请先在设置页面配置您的 DeepSeek API Key');
     }
+    
+    // 检查是否使用reasoner模型并记录日志
+    const isReasonerModel = modelName === 'deepseek-reasoner';
+    console.log('API调用 - 是否使用Reasoner模型:', isReasonerModel);
 
     const response = await fetch(`${API_CONFIG.BASE_URL}/chat/completions`, {
       method: 'POST',
@@ -52,7 +72,7 @@ export async function chatCompletion(
         'Accept': 'text/event-stream',
       },
       body: JSON.stringify({
-        model: API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS],
+        model: modelName, // 使用正确转换的模型名称
         messages: messages.map(({ role, content }) => ({ role, content })),
         temperature: settings.temperature,
         ...(tools && tools.length > 0 ? { tools } : {}),
@@ -71,7 +91,7 @@ export async function chatCompletion(
         errorMessage.includes('access token') ||
         errorMessage.includes('unauthorized')) {
        
-        throw new Error(apiKey + 'API Key 无效，请检查您的 API Key 设置');
+        throw new Error('API Key 无效，请检查您的 API Key 设置');
       }
 
       throw new Error(
@@ -83,6 +103,7 @@ export async function chatCompletion(
       throw new Error('响应体为空');
     }
 
+    // 处理响应流
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
@@ -117,15 +138,28 @@ export async function chatCompletion(
             try {
               const parsed = JSON.parse(data);
 
+              // 处理内容流
               if (parsed.choices?.[0]?.delta?.content) {
                 const content = parsed.choices[0].delta.content;
                 fullContent += content;
                 onStream?.(content);
               }
+              
+              // 处理reasoning_content流（仅在reasoner模型中有）
               if (parsed.choices?.[0]?.delta?.reasoning_content) {
                 const content = parsed.choices[0].delta.reasoning_content;
+                console.log('接收到reasoning_content:', content); // 调试日志
                 fullReasoningContent += content;
                 onStreamReasoning?.(content);
+              } else if (isReasonerModel && !parsed.choices?.[0]?.delta?.reasoning_content && 
+                         parsed.choices?.[0]?.delta?.content) {
+                // 如果是reasoner模型，但没有收到reasoning_content，记录一个警告
+                console.warn('使用的是reasoner模型，但未收到reasoning_content数据', parsed);
+              }
+
+              // 记录完整的解析数据，用于调试
+              if (parsed.model) {
+                console.log('API返回的模型名称:', parsed.model);
               }
 
               if (parsed.choices?.[0]?.delta?.tool_calls?.[0]) {
@@ -170,7 +204,7 @@ export async function chatCompletion(
                         'Accept': 'text/event-stream',
                       },
                       body: JSON.stringify({
-                        model: API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS],
+                        model: modelName,
                         messages: [
                           ...messages,
                           {

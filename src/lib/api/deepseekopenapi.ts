@@ -165,7 +165,7 @@ export async function chatCompletion(
                         'Authorization': `Bearer ${apiKey}`,
                       },
                       body: JSON.stringify({
-                        model: API_CONFIG.MODELS[settings.model as keyof typeof API_CONFIG.MODELS],
+                        model: modelName,
                         messages: [
                           ...messages.map(msg => ({ 
                             role: msg.role, 

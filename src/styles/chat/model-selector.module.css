@@ -43,4 +43,27 @@
   border: none !important;
   box-shadow: none !important;
   background-color: transparent !important;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.switchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.thinkingSwitch {
+  margin-right: 4px;
+}
+
+.switchLabel {
+  font-size: 14px;
+  color: #666;
+  user-select: none;
 } 

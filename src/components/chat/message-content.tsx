@@ -15,11 +15,20 @@ const CodeBlock = memo(({ language, code, onCopy, isCopied }: {
 }) => (
   <div className="relative group">
     <Button
-      type="text"
+      type="primary"
       size="small"
-      className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+      className="absolute right-2 top-2 opacity-100 z-10"
       icon={isCopied ? <CheckOutlined /> : <CopyOutlined />}
       onClick={() => onCopy(code)}
+      style={{ 
+        backgroundColor: isCopied ? '#52c41a' : '#1890ff',
+        borderColor: isCopied ? '#52c41a' : '#1890ff',
+        color: '#fff',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
     />
     <SyntaxHighlighter
       language={language}

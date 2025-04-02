@@ -302,7 +302,7 @@ export const useChatStore = create<ChatState>()(
               if (currentMsg.role === 'user') {
                 fixedMessages.push({
                   role: 'assistant',
-                  content: '[占位回复]',
+                  content: '[服务器出错了,请稍后重试]',
                   timestamp: Date.now() - 1000,
                   reasoning_content: '',
                 });

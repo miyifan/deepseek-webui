@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Input, Button, message, Tooltip, Modal, Upload } from 'antd';
 import { SendOutlined, DeleteOutlined, DownloadOutlined, PaperClipOutlined, StopOutlined } from '@ant-design/icons';
 import { useChatStore } from '@/lib/store/chat-store';
@@ -42,6 +42,16 @@ export const ChatInput: React.FC = () => {
   const currentWindow = windows.find(w => w.id === currentWindowId);
   const messages = currentWindow?.messages || [];
   const settings = currentWindow?.settings || {} as ChatSettings;
+  
+  // 添加调试日志，检查当前使用的模型
+  useEffect(() => {
+    if (currentWindow) {
+      console.log('当前聊天窗口ID:', currentWindowId);
+      console.log('当前聊天窗口:', currentWindow);
+      console.log('当前聊天窗口使用的模型:', currentWindow.settings.model);
+      console.log('当前使用的settings对象:', settings);
+    }
+  }, [currentWindow, currentWindowId, settings]);
 
   const handleSend = async () => {
     if (!content.trim()) return;
@@ -101,6 +111,10 @@ export const ChatInput: React.FC = () => {
             apiUserMessage,
           ]
         : [...messages.map(msg => ({ role: msg.role as any, content: msg.content })), apiUserMessage];
+
+      // 添加调试日志，查看当前使用的模型设置
+      console.log('发送消息时使用的模型:', settings.model);
+      console.log('当前设置:', JSON.stringify(settings, null, 2));
 
       let streamContent = '';
       let reasoningContent = '';
