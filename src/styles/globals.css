@@ -1,0 +1,477 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 标准表格样式 */
+.standard-table-container {
+  width: 100%;
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+.standard-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e2e8f0;
+  font-size: 15px;
+}
+
+.standard-table th {
+  padding: 12px 16px;
+  text-align: left;
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  font-weight: 600;
+  color: #333;
+}
+
+.standard-table td {
+  padding: 12px 16px;
+  border-top: 1px solid #e2e8f0;
+  color: #4a5568;
+  vertical-align: top;
+}
+
+.standard-table tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.standard-table tr:hover {
+  background-color: #f1f5f9;
+}
+
+.green-check {
+  color: #22c55e;
+  font-size: 16px;
+}
+
+/* GPU规格列表样式 */
+.spec-list-container {
+  width: 100%;
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background-color: #fff;
+  border: 1px solid #eaeaea;
+}
+
+.gpu-spec-full-content {
+  width: 100%;
+  margin: 20px 0;
+}
+
+.gpu-spec-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.gpu-spec-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #eaeaea;
+}
+
+.gpu-spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.gpu-spec-category-row {
+  background-color: #f0f2f5;
+}
+
+.gpu-spec-category-cell {
+  padding: 12px 15px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+}
+
+.gpu-spec-header-row {
+  background-color: #f8f9fa;
+}
+
+.gpu-spec-header-cell {
+  padding: 10px 12px;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid #eaeaea;
+  color: #333;
+}
+
+.gpu-spec-row:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.gpu-spec-row:hover {
+  background-color: #f5f7fa;
+}
+
+.gpu-spec-cell {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eaeaea;
+  color: #444;
+}
+
+.gpu-spec-text-row {
+  background-color: #fff;
+}
+
+.gpu-spec-text-cell {
+  padding: 10px 15px;
+  color: #666;
+  line-height: 1.5;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.spec-list-section {
+  margin-bottom: 15px;
+}
+
+.spec-list-category {
+  background-color: #f0f2f5;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.spec-list-items {
+  padding: 0 15px;
+}
+
+.spec-list-item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+@media (min-width: 768px) {
+  .spec-list-item {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 12px 0;
+  }
+}
+
+.spec-list-key {
+  font-weight: 600;
+  color: #555;
+  min-width: 150px;
+  padding: 4px 0;
+}
+
+.spec-list-value {
+  color: #333;
+  padding: 4px 0;
+  flex: 1;
+}
+
+.normal-content {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+/* 自定义规格表格样式 */
+.custom-spec-table {
+  width: 100%;
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background-color: #fff;
+  border: 1px solid #eaeaea;
+}
+
+.custom-table-section {
+  margin-bottom: 12px;
+}
+
+.custom-table-category {
+  background-color: #f0f2f5;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.custom-table-content {
+  padding: 0 8px;
+}
+
+.custom-table-row {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+@media (min-width: 768px) {
+  .custom-table-row {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.custom-table-subcategory {
+  font-weight: 600;
+  color: #555;
+  min-width: 150px;
+  padding: 5px 10px 5px 5px;
+}
+
+.custom-table-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 5px 0;
+}
+
+.custom-table-value {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* GPU分类标签样式 */
+.gpu-category-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #eaeaea;
+  overflow-x: auto;
+}
+
+.gpu-category-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  color: #333;
+  margin: 2px 4px;
+  font-weight: 500;
+}
+
+.gpu-category-item {
+  display: flex;
+  flex-direction: column;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin: 2px 4px;
+}
+
+.gpu-category-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.gpu-category-subtext {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.numbered-list-item {
+  margin: 8px 0;
+  padding: 8px 12px;
+  background-color: #f8fafc;
+  border-radius: 4px;
+  border-left: 3px solid #3b82f6;
+}
+
+.html-content {
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+/* 特殊分类标签样式（兼容旧版） */
+.category-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 8px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
+  overflow-x: auto;
+}
+
+.category-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  color: #333;
+  margin: 2px;
+}
+
+.category-tag:hover {
+  background-color: #e8e8e8;
+}
+
+/* 标准Markdown表格样式，确保与简化的渲染逻辑一致 */
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+  font-size: 15px;
+  overflow-x: auto;
+  border-radius: 4px;
+}
+
+.markdown-content th,
+.markdown-content td {
+  padding: 12px 16px;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+}
+
+.markdown-content th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.markdown-content tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.markdown-content tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* 确保表格在移动设备上可以水平滚动 */
+@media (max-width: 768px) {
+  .markdown-content,
+  .standard-table-container {
+    overflow-x: auto;
+    display: block;
+    width: 100%;
+  }
+  
+  .markdown-content table {
+    min-width: 100%;
+  }
+  
+  .gpu-category-container,
+  .gpu-spec-section {
+    padding: 8px;
+  }
+  
+  .gpu-category-tag {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+  
+  .custom-table-row,
+  .spec-list-item {
+    padding: 8px 5px;
+  }
+  
+  .custom-table-subcategory,
+  .spec-list-key {
+    min-width: 120px;
+    margin-bottom: 5px;
+  }
+}
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: white;
+}
+
+/* 表格内容与表格后内容分离样式 */
+.table-content-wrapper {
+  width: 100%;
+}
+
+.after-table-content {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.after-table-content h1, 
+.after-table-content h2, 
+.after-table-content h3, 
+.after-table-content h4, 
+.after-table-content h5, 
+.after-table-content h6 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 600;
+}
+
+.after-table-content h1 {
+  font-size: 22px;
+}
+
+.after-table-content h2 {
+  font-size: 20px;
+}
+
+.after-table-content h3 {
+  font-size: 18px;
+}
+
+.after-table-content p {
+  margin: 8px 0;
+  line-height: 1.6;
+  color: #444;
+}
+
+.after-table-content ul, 
+.after-table-content ol {
+  margin: 10px 0;
+  padding-left: 24px;
+}
+
+.after-table-content li {
+  margin: 5px 0;
+} 
