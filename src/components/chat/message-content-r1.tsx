@@ -468,183 +468,143 @@ interface MessageContentProps {
 
 export const MessageContentR1 = memo(({ content, onClick }: MessageContentProps) => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const [processedContent, setProcessedContent] = useState(content);
-  const [comparisonTableContent, setComparisonTableContent] = useState<string | null>(null);
-  const [standardTableContent, setStandardTableContent] = useState<string | null>(null);
-  const [beforeTableContent, setBeforeTableContent] = useState<string | null>(null);
-  const [afterTableContent, setAfterTableContent] = useState<string | null>(null);
+  const [contentBlocks, setContentBlocks] = useState<Array<{type: 'text' | 'table' | 'comparison', content: string}>>([]);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 重置表格内容状态
-    setComparisonTableContent(null);
-    setStandardTableContent(null);
-    setBeforeTableContent(null);
-    setAfterTableContent(null);
-    
     // 默认情况下保留原始内容
-    setProcessedContent(content);
+    setContentBlocks([{ type: 'text', content }]);
     
     // 若内容为空，直接返回
     if (!content || content.trim() === '') {
       return;
     }
     
-    // 提取内容中可能的表格部分
-    const extractTableContent = () => {
-      // 对原始内容进行标准化处理，确保每行都正确断行
-      const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-      const lines = normalizedContent.split('\n');
-      let inTable = false;
-      let tableStart = -1;
-      let tableEnd = -1;
-      let tableLines = 0;
-      
-      // 找出所有可能的表格区块
-      const possibleTables: {start: number, end: number, content: string}[] = [];
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        // 只有包含至少两个|符号才可能是表格行
-        const pipeCount = (line.match(/\|/g) || []).length;
-        const hasTableMarker = pipeCount >= 2;
-        
-        // 检测表格开始
-        if (!inTable && hasTableMarker) {
-          inTable = true;
-          tableStart = i;
-          tableLines = 1;
-        } 
-        // 累计表格行
-        else if (inTable && hasTableMarker) {
-          tableLines++;
-        } 
-        // 检测表格结束
-        else if (inTable && !hasTableMarker && 
-                (line === '' || line.startsWith('#') || line.match(/^\d+\.\s/) || 
-                 line.startsWith('```'))) {
-          inTable = false;
-          tableEnd = i - 1;
-          
-          // 至少有3行才可能是表格
-          if (tableLines >= 3) {
-            const tableContent = lines.slice(tableStart, tableEnd + 1).join('\n');
-            possibleTables.push({
-              start: tableStart,
-              end: tableEnd,
-              content: tableContent
-            });
-          }
-        }
-      }
-      
-      // 如果表格一直到内容结束
-      if (inTable) {
-        tableEnd = lines.length - 1;
-        
-        if (tableLines >= 3) {
-          const tableContent = lines.slice(tableStart, tableEnd + 1).join('\n');
-          possibleTables.push({
-            start: tableStart,
-            end: tableEnd,
-            content: tableContent
-          });
-        }
-      }
-      
-      return { possibleTables, lines, normalizedContent };
-    };
-    
-    // 检查内容是否为比较表格
-    const isComparisonTable = (tableContent: string) => {
-      // 表格行数
-      const tableLines = tableContent.split('\n');
-      const tableLineCount = tableLines.filter(line => line.includes('|')).length;
-      
-      // 检查是否有表格结构
-      const hasTableStructure = tableLineCount >= 3 && 
-                           (tableContent.includes('|---') || 
-                            tableContent.includes('---|') || 
-                            tableLines.some(line => (line.match(/\|/g) || []).length >= 3));
-      
-      // 表格内部本身就包含复杂结构（如带**的行）
-      return hasTableStructure && tableContent.includes('**') && tableLineCount >= 3;
-    };
-    
-    // 检查内容是否为标准表格
-    const isStandardTable = (tableContent: string) => {
-      // 表格行数
-      const tableLines = tableContent.split('\n');
-      const tableLineCount = tableLines.filter(line => line.includes('|')).length;
-      
-      // 检查是否有表格结构
-      const hasTableStructure = tableLineCount >= 3 && 
-                           (tableContent.includes('|---') || 
-                            tableContent.includes('---|'));
-      
-      return hasTableStructure && tableLineCount >= 3;
-    };
-    
     try {
-      // 从内容中提取所有可能的表格
-      const { possibleTables, lines, normalizedContent } = extractTableContent();
-      
-      // 检查有没有符合格式的表格
-      if (possibleTables.length > 0) {
-        // 先检查比较表格
-        const comparisonTable = possibleTables.find(table => isComparisonTable(table.content));
-        if (comparisonTable) {
-          setComparisonTableContent(comparisonTable.content);
-          
-          // 计算表格前后的内容位置
-          const beforeStartPos = 0;
-          const beforeEndPos = lines.slice(0, comparisonTable.start).join('\n').length;
-          const afterStartPos = lines.slice(0, comparisonTable.end + 1).join('\n').length + 1;
-          const afterEndPos = normalizedContent.length;
-          
-          // 提取表格前后的确切内容
-          const before = normalizedContent.substring(beforeStartPos, beforeEndPos).trim();
-          const after = normalizedContent.substring(afterStartPos, afterEndPos).trim();
-          
-          if (before) setBeforeTableContent(before);
-          if (after) setAfterTableContent(after);
-          
-          // 找到了表格，将原始内容设置为空
-          setProcessedContent('');
-          return;
-        }
-        
-        // 再检查标准表格
-        const standardTable = possibleTables.find(table => isStandardTable(table.content));
-        if (standardTable) {
-          setStandardTableContent(standardTable.content);
-          
-          // 计算表格前后的内容位置
-          const beforeStartPos = 0;
-          const beforeEndPos = lines.slice(0, standardTable.start).join('\n').length;
-          const afterStartPos = lines.slice(0, standardTable.end + 1).join('\n').length + 1;
-          const afterEndPos = normalizedContent.length;
-          
-          // 提取表格前后的确切内容
-          const before = normalizedContent.substring(beforeStartPos, beforeEndPos).trim();
-          const after = normalizedContent.substring(afterStartPos, afterEndPos).trim();
-          
-          if (before) setBeforeTableContent(before);
-          if (after) setAfterTableContent(after);
-          
-          // 找到了表格，将原始内容设置为空
-          setProcessedContent('');
-          return;
-        }
+      // 解析内容中的所有表格
+      const blocks = extractAllTables(content);
+      if (blocks.length > 0) {
+        setContentBlocks(blocks);
       }
-      
-      // 如果没有找到任何表格，保持原始内容不变（在函数开始已经设置）
     } catch (error) {
       console.error('处理内容时出错:', error);
-      // 出错时还是显示原始内容
-      setProcessedContent(content);
+      // 出错时显示原始内容
+      setContentBlocks([{ type: 'text', content }]);
     }
   }, [content]);
+
+  // 提取内容中的所有表格和文本块
+  const extractAllTables = (originalContent: string) => {
+    // 对原始内容进行标准化处理，确保每行都正确断行
+    const normalizedContent = originalContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const lines = normalizedContent.split('\n');
+    
+    // 用于保存所有内容块
+    const blocks: Array<{type: 'text' | 'table' | 'comparison', content: string}> = [];
+    
+    // 进行内容分块
+    let currentBlock: string[] = [];
+    let currentBlockType: 'text' | 'table' | null = 'text';
+    let inTable = false;
+    let tableLines = 0;
+    
+    // 按行处理内容
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      // 检查是否是表格标记行
+      const pipeCount = (line.match(/\|/g) || []).length;
+      const hasTableMarker = pipeCount >= 2;
+      
+      // 进入表格
+      if (!inTable && hasTableMarker) {
+        // 如果之前有文本内容，保存它
+        if (currentBlock.length > 0) {
+          blocks.push({
+            type: 'text',
+            content: currentBlock.join('\n')
+          });
+          currentBlock = [];
+        }
+        
+        inTable = true;
+        tableLines = 1;
+        currentBlockType = 'table';
+        currentBlock.push(line);
+      }
+      // 在表格内部
+      else if (inTable && hasTableMarker) {
+        tableLines++;
+        currentBlock.push(line);
+      }
+      // 表格结束
+      else if (inTable && !hasTableMarker) {
+        inTable = false;
+        
+        // 检查是否是有效的表格（至少3行）
+        if (tableLines >= 3) {
+          // 检查是否是特殊格式的比较表格
+          const tableContent = currentBlock.join('\n');
+          const isComparison = isComparisonTable(tableContent);
+          
+          blocks.push({
+            type: isComparison ? 'comparison' : 'table',
+            content: tableContent
+          });
+        } else {
+          // 不是有效表格，作为普通文本处理
+          blocks.push({
+            type: 'text',
+            content: currentBlock.join('\n')
+          });
+        }
+        
+        // 开始新的文本块
+        currentBlock = [line];
+        currentBlockType = 'text';
+        tableLines = 0;
+      }
+      // 普通文本
+      else {
+        currentBlock.push(line);
+      }
+    }
+    
+    // 处理最后一个块
+    if (currentBlock.length > 0) {
+      if (inTable && tableLines >= 3) {
+        const tableContent = currentBlock.join('\n');
+        const isComparison = isComparisonTable(tableContent);
+        
+        blocks.push({
+          type: isComparison ? 'comparison' : 'table',
+          content: tableContent
+        });
+      } else {
+        blocks.push({
+          type: 'text',
+          content: currentBlock.join('\n')
+        });
+      }
+    }
+    
+    return blocks;
+  };
+  
+  // 检查内容是否为比较表格
+  const isComparisonTable = (tableContent: string) => {
+    // 表格行数
+    const tableLines = tableContent.split('\n');
+    const tableLineCount = tableLines.filter(line => line.includes('|')).length;
+    
+    // 检查是否有表格结构
+    const hasTableStructure = tableLineCount >= 3 && 
+                         (tableContent.includes('|---') || 
+                          tableContent.includes('---|') || 
+                          tableLines.some(line => (line.match(/\|/g) || []).length >= 3));
+    
+    // 表格内部本身就包含复杂结构（如带**的行）
+    return hasTableStructure && tableContent.includes('**') && tableLineCount >= 3;
+  };
 
   const handleCopyCode = async (code: string) => {
     try {
@@ -714,28 +674,13 @@ export const MessageContentR1 = memo(({ content, onClick }: MessageContentProps)
   return (
     <div ref={contentRef} onClick={onClick}>
       <Suspense fallback={<Spin />}>
-        {/* 表格前的内容 */}
-        {beforeTableContent && (
-          <div className="before-table-content">
-            {renderMarkdown(beforeTableContent)}
+        {contentBlocks.map((block, index) => (
+          <div className="content-block" key={`block-${index}`}>
+            {block.type === 'text' && renderMarkdown(block.content)}
+            {block.type === 'table' && <StandardTable content={block.content} />}
+            {block.type === 'comparison' && <ComparisonTableContent content={block.content} />}
           </div>
-        )}
-        
-        {/* 比较表格 */}
-        {comparisonTableContent && <ComparisonTableContent content={comparisonTableContent} />}
-        
-        {/* 标准表格 */}
-        {standardTableContent && <StandardTable content={standardTableContent} />}
-        
-        {/* 表格后的内容 */}
-        {afterTableContent && (
-          <div className="after-table-content">
-            {renderMarkdown(afterTableContent)}
-          </div>
-        )}
-        
-        {/* 普通内容 */}
-        {processedContent && renderMarkdown(processedContent)}
+        ))}
       </Suspense>
     </div>
   );
