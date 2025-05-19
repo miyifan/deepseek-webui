@@ -45,7 +45,12 @@
   font-size: 16px;
 }
 
-/* GPU规格列表样式 */
+.red-cross {
+  color: #ef4444;
+  font-size: 16px;
+}
+
+/* 规格列表样式 */
 .spec-list-container {
   width: 100%;
   margin: 20px 0;
@@ -56,12 +61,12 @@
   border: 1px solid #eaeaea;
 }
 
-.gpu-spec-full-content {
+.spec-full-content {
   width: 100%;
   margin: 20px 0;
 }
 
-.gpu-spec-title {
+.spec-title {
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 12px;
@@ -69,7 +74,7 @@
   color: #333;
 }
 
-.gpu-spec-container {
+.spec-table-container {
   width: 100%;
   overflow-x: auto;
   border-radius: 8px;
@@ -77,17 +82,17 @@
   border: 1px solid #eaeaea;
 }
 
-.gpu-spec-table {
+.spec-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 }
 
-.gpu-spec-category-row {
+.spec-category-row {
   background-color: #f0f2f5;
 }
 
-.gpu-spec-category-cell {
+.spec-category-cell {
   padding: 12px 15px;
   font-size: 16px;
   font-weight: 600;
@@ -95,11 +100,11 @@
   border-bottom: 1px solid #ddd;
 }
 
-.gpu-spec-header-row {
+.spec-header-row {
   background-color: #f8f9fa;
 }
 
-.gpu-spec-header-cell {
+.spec-header-cell {
   padding: 10px 12px;
   font-weight: 600;
   text-align: left;
@@ -107,25 +112,25 @@
   color: #333;
 }
 
-.gpu-spec-row:nth-child(even) {
+.spec-row:nth-child(even) {
   background-color: #f9fafb;
 }
 
-.gpu-spec-row:hover {
+.spec-row:hover {
   background-color: #f5f7fa;
 }
 
-.gpu-spec-cell {
+.spec-cell {
   padding: 10px 12px;
   border-bottom: 1px solid #eaeaea;
   color: #444;
 }
 
-.gpu-spec-text-row {
+.spec-text-row {
   background-color: #fff;
 }
 
-.gpu-spec-text-cell {
+.spec-text-cell {
   padding: 10px 15px;
   color: #666;
   line-height: 1.5;
@@ -385,7 +390,7 @@
   }
   
   .gpu-category-container,
-  .gpu-spec-section {
+  .spec-list-item {
     padding: 8px;
   }
   
