@@ -17,12 +17,24 @@ const formatWindowTitle = () => {
   // 获取所有对话窗口
   const allWindows = useChatStore.getState().windows;
   
-  // 从标题中提取序号，格式为：新对话M.D(N)
-  // 找出最大序号然后加1，实现无限递增
+  // 匹配标题中的序号，支持两种格式：
+  // 1. 新对话M.D(N)
+  // 2. 新对话(N)
   const maxNumber = allWindows
     .map(w => {
-      const match = w.title.match(/新对话[\d\.]+\((\d+)\)/);
-      return match ? parseInt(match[1], 10) : 0;
+      // 匹配任意日期格式的序号
+      const dateFormatMatch = w.title.match(/新对话[\d\.]+\((\d+)\)/);
+      if (dateFormatMatch) {
+        return parseInt(dateFormatMatch[1], 10);
+      }
+      
+      // 匹配简单序号格式
+      const simpleFormatMatch = w.title.match(/新对话\((\d+)\)/);
+      if (simpleFormatMatch) {
+        return parseInt(simpleFormatMatch[1], 10);
+      }
+      
+      return 0;
     })
     .reduce((max, num) => Math.max(max, num), 0);
   

@@ -96,7 +96,39 @@ export const ChatInput: React.FC = () => {
     };
 
     try {
+      // 添加用户消息
       addMessage(displayUserMessage);
+      
+      // 尝试在用户发送消息时就更新标题
+      if (currentWindow) {
+        console.log('检查是否需要更新标题:', currentWindow.title);
+        // 以下情况自动更新标题：
+        // 1. 当前是默认标题"新对话"
+        // 2. 当前标题是按日期格式自动生成的标题(例如"新对话7.18(1)")
+        const isDefaultTitle = currentWindow.title === '新对话';
+        const isDateFormatTitle = /^新对话\d+\.\d+\(\d+\)$/.test(currentWindow.title);
+        // 3. 当前标题是带序号的默认标题(例如"新对话(1)")
+        const isNumberFormatTitle = /^新对话\(\d+\)$/.test(currentWindow.title);
+        
+        console.log('标题检查结果:', {
+          isDefaultTitle,
+          isDateFormatTitle,
+          isNumberFormatTitle,
+          title: currentWindow.title
+        });
+        
+        if (isDefaultTitle || isDateFormatTitle || isNumberFormatTitle) {
+          // 使用当前发送的消息更新标题
+          const maxLength = 30;
+          let newTitle = content.trim().slice(0, maxLength);
+          if (content.trim().length > maxLength) {
+            newTitle += '...';
+          }
+          console.log('更新标题为:', newTitle);
+          updateWindowTitle(currentWindow.id, newTitle);
+        }
+      }
+      
       setLoading(true);
       setIsSending(true);
       setCurrentStreamingMessage('');
@@ -139,14 +171,6 @@ export const ChatInput: React.FC = () => {
         timestamp: Date.now(),
         reasoning_content: response.reasoningContent,
       });
-
-      // 更新窗口标题（如果还没有设置过）
-      if (currentWindow && currentWindow.title === '新对话') {
-        const firstUserMessage = messages.find(msg => msg.role === 'user');
-        if (firstUserMessage) {
-          updateWindowTitle(currentWindow.id, firstUserMessage.content.slice(0, 30) + '...');
-        }
-      }
 
       setFileList([]);
       setUploadedFileIds([]);
